@@ -1,0 +1,25 @@
+# Essbase Info
+ess_olapSvrName=192.168.233.6
+ess_olapSvrPort=1423
+ess_userName=admin
+ess_password=paswword
+ess_appName=app1
+ess_cubeName=cube1
+# ess_provider=http://192.168.233.6:19000/aps/JAPI
+# ess_analyticSvrName=WIN-N9EEU9Q2EEU
+
+# 此维度顺序也是数据加载进Essbase的顺序 Data维度必须放在最后
+ess_dimensions=YEARS,PERIODS,SCENARIO,VERSION,ENTITY,PROJECT,ACCOUNT,CURRENCY,BUDGETCENTER,MISC,PHASE,SPARE1,SPARE2,SPARE3,DATA
+
+# Target Database Info
+target_db_url=jdbc:oracle:thin:@//192.168.233.6:1521/demo
+target_db_table=target.targettable
+target_db_username=username
+target_db_password=password
+
+
+# Source Database Info
+src_db_url=jdbc:oracle:thin:@//192.168.233.6:1521/demo
+src_db_table=src.srctable
+src_db_username=username
+src_db_password=password
