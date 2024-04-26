@@ -35,3 +35,7 @@ bin/
 
 # config files
 **/config.properties
+
+# logs and error files
+*.log
+*.err

@@ -1,4 +1,3 @@
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -8,7 +7,6 @@ import java.util.HashMap;
 import java.util.logging.Logger;
 
 import com.hyperion.odi.common.ODIConstants;
-import com.hyperion.odi.common.ODIHAppException;
 import com.hyperion.odi.common.ODIStatistics;
 import com.hyperion.odi.connection.HypAppConnectionFactory;
 import com.hyperion.odi.connection.IHypAppWriter;
@@ -22,7 +20,7 @@ public class HyperionEssbaseLoad {
     /**
      * 主方法，负责从数据库加载数据并将其写入到 Essbase 应用。
      */
-    public static void loadMain() {
+    public static void loadMain(String args[]) {
         try {
             logger.info("开始 ------------------------");
             // 获取 Essbase 连接信息
@@ -45,7 +43,7 @@ public class HyperionEssbaseLoad {
             essbaseAppWriter.beginLoad(loadOptions);
             logger.info("获取加载选项");
             
-            String loadString = loadData(srcProps, essbaseAppWriter);
+            String loadString = loadData(srcProps, essbaseAppWriter,args);
             logger.info(loadString);
         } catch (Exception e) {
             logger.severe("异常: " + e.getMessage());
@@ -60,23 +58,11 @@ public class HyperionEssbaseLoad {
      * @param srcConn 数据库连接
      * @param essbaseAppWriter Essbase 应用写入器
      * @return 加载状态信息
-     * @throws ODIHAppException 如果加载过程中发生错误，则抛出 ODIHAppException
-     * @throws SQLException 
-     * @throws InterruptedException 
-     * @throws IOException 
+     * @throws Exception 
      */
-    public static String loadData(Connection srcConn, IHypAppWriter essbaseAppWriter) throws ODIHAppException, SQLException, InterruptedException, IOException {
-        // 定义 SQL 语句用于从数据库加载数据
-        PropertyLoader ploader = new PropertyLoader();
-        String columns = ploader.getDimensionString();
-        String srcTable = ploader.getProperties().getProperty("src_db_table");
-        //"'#Missing' AS \"Data\"
-        String sqlData = "SELECT " + columns +
-        " FROM " + srcTable +
-        " WHERE (1=1) " +
-        "AND (BATCH_NAME='Manul' " +
-        "AND YEAR_NUM='2022' " +
-        "AND PERIOD_NUM='1') ";
+    public static String loadData(Connection srcConn, IHypAppWriter essbaseAppWriter,String args[]) throws Exception {
+        // 获取查询sql
+        String sqlData = queryString(args);
         System.out.println(sqlData);
         logger.info("开始加载数据 ------------------------");
         ODIStatistics status = new ODIStatistics();
@@ -97,7 +83,36 @@ public class HyperionEssbaseLoad {
         return status.toString();
     }
 
-    /**
+    public static String queryString(String args[]) throws Exception {
+        // 获取命令行参数
+        if (args.length != 4) {
+            logger.severe("ERROR:Missing parameter");
+            throw new Exception("Usage: java -jar HyperionEssbaseLoad.jar <operation_type> <batch_name> <year_num> <period_num>");
+        }
+        // 打印参数
+        System.out.println("Batch Name: " + args[1]);
+        System.out.println("Year Num: " + args[2]);
+        System.out.println("Period Num: " + args[3]);
+    
+        // 从配置文件获取维度列和数据表名称
+        PropertyLoader ploader = new PropertyLoader();
+        String columns = ploader.getDimensionString();
+        String srcTable = ploader.getProperties().getProperty("src_db_table");
+        StringBuilder sb = new StringBuilder();
+        
+        // 定义 SQL 语句用于从数据库加载数据
+        //"'#Missing' AS \"Data\"
+        sb.append("SELECT ");
+        sb.append(columns);
+        sb.append(" FROM ");
+        sb.append(srcTable);
+        sb.append(" WHERE (1=1) ");
+        sb.append("AND (BATCH_NAME='"+args[1]+"' ");
+        sb.append("AND YEAR_NUM='"+args[2]+"' ");
+        sb.append("AND PERIOD_NUM='"+args[1]+"') ");
+        return sb.toString();
+
+    }    /**
      * 获取加载选项。
      *
      * @return 加载选项的 HashMap
