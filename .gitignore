@@ -37,5 +37,6 @@ bin/
 **/config.properties
 
 # logs and error files
+/output
 *.log
 *.err

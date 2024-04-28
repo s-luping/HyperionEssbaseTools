@@ -13,7 +13,7 @@ public class PropertyLoader {
      * @throws IOException
      */
     public  Properties getProperties() throws IOException {
-        InputStream inputStream = this.getClass().getResourceAsStream("./config.properties");
+        InputStream inputStream = this.getClass().getResourceAsStream("config.properties");
         Properties properties = new Properties();
         properties.load(inputStream);
         return properties;
