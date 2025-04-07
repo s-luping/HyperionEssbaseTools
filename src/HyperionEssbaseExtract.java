@@ -17,17 +17,18 @@ public class HyperionEssbaseExtract {
     /**
      * 主要的提取方法。
      */
-    public static void extractMain() {
+    public static void extractMain(String extract_file_name) {
         try {
             logger.info("begin ------------------------");
             // 获取Essbase连接信息
             HashMap<String, Object> srcProps = new HashMap<>();
-            srcProps = ConnProperties.getEssbaseProp();
+            srcProps = ConnProperties.EssbaseConnection();
             srcProps.put(ODIConstants.READER_TYPE, "DATA_READER");
             logger.info("获取Essbase连接信息");
 
             // 初始化Essbase应用读取器并连接
-            IHypAppReader essbaseAppReader = HypAppConnectionFactory.getAppReader(HypAppConnectionFactory.APP_ESSBASE,
+            IHypAppReader essbaseAppReader = HypAppConnectionFactory.getAppReader(
+                    HypAppConnectionFactory.APP_ESSBASE,
                     srcProps);
             logger.info("初始化Essbase应用读取器并连接");
 
@@ -37,7 +38,7 @@ public class HyperionEssbaseExtract {
 
             // 获取提取选项
             HashMap<String, Object> extractOptions = new HashMap<>();
-            extractOptions = getExtractOptions(databaseMap);
+            extractOptions = getExtractOptions(databaseMap, extract_file_name);
             essbaseAppReader.beginExtract(extractOptions);
             logger.info("获取提取选项");
 
@@ -46,10 +47,10 @@ public class HyperionEssbaseExtract {
             System.out.println("end ------------------------");
         } catch (Exception e) {
             logger.info(e.getMessage());
+            e.printStackTrace();
         }
         logger.info("end final------------------------");
     }
-
 
     /**
      * 获取提取选项。
@@ -57,27 +58,31 @@ public class HyperionEssbaseExtract {
      * @param databaseMap 包含数据库连接信息的HashMap。
      * @return 提取选项的HashMap。
      * @throws SQLException 如果处理提取选项时发生SQL异常。
-     * @throws IOException 
+     * @throws IOException
      */
-    public static HashMap<String, Object> getExtractOptions(HashMap<String, Object> databaseMap) throws SQLException, IOException {
-        SimpleDateFormat ft = new SimpleDateFormat ("yyyy-MM-dd_hh_mm_ss");
+    public static HashMap<String, Object> getExtractOptions(HashMap<String, Object> databaseMap,
+            String extract_file_name)
+            throws SQLException, IOException {
+        SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd_HH_mm_ss");
         // 提取LKM选项
         String preMaxl = "";
         String postMaxl = "";
         String extractionType = "ReportScript";
-        String extractionQuery = "ESS_EX2";
+        String extractionQuery = extract_file_name;
         String colDelimiter = "\t";
         String dataFileInCalc = "";
         String preCalcScript = "";
-        String logFileName = "./ESS_EXP_"+ft.format(new java.util.Date())+".log";
-        
+        String logFileName = "logs/" + extract_file_name
+                + ft.format(new java.util.Date()) + ".log";
+
         // 错误记录处理设置
         int maxErrors = 1;
-        String errFileName = "./ESS_EXP_"+ft.format(new java.util.Date())+".err";
+        String errFileName = "logs/" + extract_file_name
+                + ft.format(new java.util.Date()) + ".err";
         String errColDelimiter = ",";
         String errRowDelimiter = "\r\n";
         String errTextDelimiter = "\"";
-        
+
         // 设置提取选项
         HashMap<String, Object> extractOptions = new HashMap<>();
         // 通用ODI知识模块选项
